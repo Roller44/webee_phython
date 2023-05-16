@@ -163,21 +163,23 @@ def shiftCons(approxfftIQs, xdelta, ydelta):
 	return newIQs
 
 def cyclicprefixer(IQs):
-    M = WITHOUTCP
-    N = WITHCP
-    length = len(IQs)
-    G = length / M
-    afterIQs = []
-    for g in range(G):
-    	tempIQs = IQs[g*M:(g+1)*M]
-    	for j in range(N-M):
-            cpI = tempIQs[2*M - N + j][0]
-            cpQ = tempIQs[2*M - N + j][1]
-            afterIQs.append([cpI,cpQ])
-        for j in range(M):
-            afterIQs.append([tempIQs[j][0], tempIQs[j][1]])
-
-    return afterIQs
+	M = WITHOUTCP
+	N = WITHCP
+	length = len(IQs)
+	G = length / M
+	afterIQs = []
+	for g in range(G):
+		tempIQs = IQs[g*M:(g+1)*M]
+		
+	for j in range(N-M):
+		cpI = tempIQs[2*M - N + j][0]
+		cpQ = tempIQs[2*M - N + j][1]
+		afterIQs.append([cpI,cpQ])
+		
+	for j in range(M):
+		afterIQs.append([tempIQs[j][0], tempIQs[j][1]])
+		
+	return afterIQs
 
 def generateIQSignal(symbol, ratio, subc):
 	WholeSignals = []
@@ -200,12 +202,13 @@ def generateIQSignal(symbol, ratio, subc):
 
 		tempSignals = []
 		for jj in range(len(tempsp)):
-		 	tempSignals.append([tempsp[jj].real, tempsp[jj].imag])
+			tempSignals.append([tempsp[jj].real, tempsp[jj].imag])
 
-		# for jj in range(len(tempsp)):
-		# 	comangle = 1*2*jj*np.pi*delta*1.0/WITHOUTCP
-		# 	offset = [np.cos(comangle), np.sin(comangle)]
-		# 	tempSignals.append(complexmultiply([tempsp[jj].real, tempsp[jj].imag],offset))
+
+		for jj in range(len(tempsp)):
+			comangle = 1*2*jj*np.pi*delta*1.0/WITHOUTCP
+			offset = [np.cos(comangle), np.sin(comangle)]
+			tempSignals.append(complexmultiply([tempsp[jj].real, tempsp[jj].imag],offset))
 
 		sp = []
 		for jj in range(groupbeforecp):
@@ -246,9 +249,9 @@ def generateISignal(symbol, ratio, subc):
 		tempSignals = []
 		if ALIGNMENT[g] == 0:
 			for jj in range(len(tempsp)):
-			 	comangle = 1*2*jj*np.pi*delta*1.0/WITHOUTCP
-			 	offset = [np.cos(comangle), np.sin(comangle)]
-			 	tempSignals.append(complexmultiply([tempsp[jj].real, tempsp[jj].imag], offset))
+				comangle = 1*2*jj*np.pi*delta*1.0/WITHOUTCP
+				offset = [np.cos(comangle), np.sin(comangle)]
+				tempSignals.append(complexmultiply([tempsp[jj].real, tempsp[jj].imag], offset))
 
 		if ALIGNMENT[g] == 1:
 			for jj in range(len(tempsp)):
@@ -285,12 +288,12 @@ def generateQSignal(symbol, ratio, subc):
 	#Left Shift
 	if symbol == 5 or symbol == 2 or symbol == 4 or symbol == 6 or symbol == 12 or symbol == 13 or symbol == 14:
 		for i in range(delta1):
-	 		LeftWholeIQs[i][1] = -1 * LeftWholeIQs[i][1]
+			LeftWholeIQs[i][1] = -1 * LeftWholeIQs[i][1]
 
     #Right Shift
 	if symbol == 5 or symbol == 2 or symbol == 4 or symbol == 6 or symbol == 12 or symbol == 13 or symbol == 14:
 		for i in range(delta1):
-	 		RightWholeIQs[length - delta1 + i][1] = -1 * RightWholeIQs[length - delta1 + i][1]
+			RightWholeIQs[length - delta1 + i][1] = -1 * RightWholeIQs[length - delta1 + i][1]
 
 	approxIY = []
 	approxQY = []
@@ -363,7 +366,7 @@ def generateIFFTSignal(approxfftIQs):
 
 		#spec = np.sqrt(sp.real*sp.real + sp.imag*sp.imag)
 		for i in range(len(sp)):
- 			newIQs.append([sp[i].real,sp[i].imag])
+			newIQs.append([sp[i].real,sp[i].imag])
 
 	return newIQs
 
@@ -419,7 +422,7 @@ def generateMultipleSignal(count, chips, ratio):
 
 			fftIQs = []
 			for i in range(len(sp)):
- 				fftIQs.append([sp[i].real,sp[i].imag])
+				fftIQs.append([sp[i].real,sp[i].imag])
 
 
 			qam = generateQAM(64,1.0801)
