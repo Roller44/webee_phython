@@ -10,6 +10,9 @@ SAMPLERATE = WITHCP / 4
 ALIGNMENT = [1,0,1,0] #1 means RIGHT and 0 means LEFT
 
 def complexmultiply(a,b):
+	# This function mimic the muliplication between two complex numbers.
+	# Note that although the output should be a complex number, its imagine
+	# part does not include "j".
 	c = [0, 0]
 	c[0] = a[0]*b[0] - a[1]*b[1]
 	c[1] = a[1]*b[0] + a[0]*b[1]
@@ -255,6 +258,7 @@ def generateISignal(symbol, ratio, subc):
 		if ALIGNMENT[g] == 0:
 			for i in range(0, WITHCP - delta):
 				complexIQs.append(np.complex64(WholeIQs[g*groupsize + i][0]))
+
 		if ALIGNMENT[g] == 1:
 			for i in range(delta, WITHCP):
 				complexIQs.append(np.complex64(WholeIQs[g*groupsize + i][0]))
