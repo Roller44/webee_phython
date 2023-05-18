@@ -172,18 +172,19 @@ LoadLen = 2
 for i in range(100):
 	filename = "./data/WEBeeQAMs"+str(i)+".txt"
 	qamfile = open(filename, "w")
- 	payload = generateFixedPayload(LoadLen, i)
- 	macload = generateMacPacket(payload, i)
- 	phyload = generatePhyPacket(macload)
- 	strhex = ''
- 	for j in range(len(phyload)):
- 		strhex = strhex + getHex(phyload[j])
- 	print strhex
+	payload = generateFixedPayload(LoadLen, i)
+	macload = generateMacPacket(payload, i)
+	phyload = generatePhyPacket(macload)
+	strhex = ''
+	for j in range(len(phyload)):
+		strhex = strhex + getHex(phyload[j])
+ 	
+	print(strhex)
 
- 	payload2 = generateFixedPayload(LoadLen, i)
- 	macload2 = generateMacPacket(payload2, i)
- 	phyload2 = generatePhyPacket(macload2)
- 	N = len(phyload)
+	payload2 = generateFixedPayload(LoadLen, i)
+	macload2 = generateMacPacket(payload2, i)
+	phyload2 = generatePhyPacket(macload2)
+	N = len(phyload)
  	
 	for sym in range(N):
 		approxfftIQs = generateParallelSignal(AllSymbols, phyload[sym], phyload2[sym])
