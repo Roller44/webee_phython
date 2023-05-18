@@ -30,13 +30,6 @@ def cycleshift(symbol, offset):
 		csymbol = tsymbol[offset:]+tsymbol[:offset]
 	return csymbol
 
-
-def complexmultiply(a,b):
-	c = [0, 0]
-	c[0] = a[0]*b[0] - a[1]*b[1]
-	c[1] = a[1]*b[0] + a[0]*b[1]
-	return c
-
 def generateQAM(N, side):
 	qam = [[0,0] for i in range(N)]
 	m = int(np.sqrt(N))
