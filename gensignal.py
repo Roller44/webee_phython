@@ -2,8 +2,6 @@ import numpy as np
 import copy
 import struct
 
-# write the detailed comments of the code
-
 WITHCP = 80
 #WITHCP = 64
 WITHOUTCP = 64
@@ -81,6 +79,10 @@ def approxQAM(qam, IQs):
 	return approxIQs
 
 def generateIQ(symbol, ratio):
+	# This function generates the waveform of a ZigBee symbol.
+	# The output IQ values are WiFi sampling instances over the ZigBee symbol.
+
+	# Chip map constuction.
 	chips = [[] for i in range(16)]
 	chips[0] = [1,1,0,1,  1,0,0,1,  1,1,0,0, 0,0,1,1,  0,1,0,1, 0,0,1,0, 0,0,1,0, 1,1,1,0]
 	chips[1] = [1,1,1,0,  1,1,0,1,  1,0,0,1,  1,1,0,0, 0,0,1,1,  0,1,0,1, 0,0,1,0, 0,0,1,0]
@@ -98,10 +100,13 @@ def generateIQ(symbol, ratio):
 	chips[13] = [0,1,1,0,  0,0,0,0, 0,1,1,1, 0,0,1,1, 1,0,1,1, 1,0,0,0,  1,1,0,0,  1,0,0,1]
 	chips[14] = [1,0,0,1, 0,1,1,0,  0,0,0,0, 0,1,1,1, 0,0,1,1, 1,0,1,1, 1,0,0,0,  1,1,0,0]
 	chips[15] = [1,1,0,0, 1,0,0,1, 0,1,1,0,  0,0,0,0, 0,1,1,1, 0,0,1,1, 1,0,1,1, 1,0,0,0]
+
+	# Symbol-to-chip.
 	chip = chips[symbol]
 	chip_len = len(chip)
 	IQs = []
 
+	# Divide a chip sequence into an I-chip sequence and a Q-chip seuqnce.
 	Ichips = []
 	Qchips = []
 	for i in range(chip_len):
@@ -110,29 +115,36 @@ def generateIQ(symbol, ratio):
 		else:
 			Qchips.append(chip[i])
 
+	# Set start time of each half-sine wave.
+	# Here, each chip is encoded into the amplitude of a half-sine wave.
 	Interval = []
 	for i in range(chip_len + 1):
 		Interval.append(i*np.pi / 2)
 
+	# Set time values of WiFi sampling instances.
+	# Each half-sine wave sampled 20 times by WiFi.
 	SampleRate = SAMPLERATE
 	X = []
 	for i in range(16):
 		for j in range(int(SampleRate)):
 			X.append(i*np.pi + j*np.pi / SampleRate)
 
+	# Set value of each WiFi sampling instance.
 	for i in range(len(X)):
+		# Figure out which chip the i-th sampling instance belongs to.
 		x = X[i]
 		index = 0
 		while x > Interval[index]:
 			index = index + 1
 
 		index = index - 1
-		
+
 		Iindex = index / 2
 		Qindex = (index - 1) / 2
 		if Qindex < 0:
 			Qindex = 0
 
+		# Let amplitudes 1 and -1 represent chip values 1 and -1, respectively.
 		if Ichips[Iindex] == 1:
 			Ibit = 1
 		else:
