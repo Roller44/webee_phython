@@ -113,10 +113,11 @@ def generateIQ(symbol, ratio):
 	Interval = []
 	for i in range(chip_len + 1):
 		Interval.append(i*np.pi / 2)
+
 	SampleRate = SAMPLERATE
 	X = []
 	for i in range(16):
-		for j in range(SampleRate):
+		for j in range(int(SampleRate)):
 			X.append(i*np.pi + j*np.pi / SampleRate)
 
 	for i in range(len(X)):
@@ -124,15 +125,19 @@ def generateIQ(symbol, ratio):
 		index = 0
 		while x > Interval[index]:
 			index = index + 1
+
 		index = index - 1
+		
 		Iindex = index / 2
 		Qindex = (index - 1) / 2
 		if Qindex < 0:
 			Qindex = 0
+
 		if Ichips[Iindex] == 1:
 			Ibit = 1
 		else:
 			Ibit = -1
+
 		if Qchips[Qindex] == 1:
 			Qbit = 1
 		else:
