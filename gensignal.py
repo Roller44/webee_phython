@@ -10,7 +10,7 @@ SAMPLERATE = WITHCP / 4
 ALIGNMENT = [1,0,1,0] #1 means RIGHT and 0 means LEFT
 
 def complexmultiply(a,b):
-	# This function mimic the muliplication between two complex numbers.
+	# This function mimics the muliplication between two complex numbers.
 	# Note that although the output should be a complex number, its imagine
 	# part does not include "j".
 	c = [0, 0]
@@ -23,11 +23,14 @@ def cycleshift(symbol, offset):
 	tsymbol = [0 for i in range(length)]
 	for i in range(length):
 		tsymbol[i] = symbol[i]
+
 	if offset >= 0:
 		csymbol = tsymbol[offset:]+tsymbol[:offset]
+		
 	if offset <= 0:
 		offset = length + offset
 		csymbol = tsymbol[offset:]+tsymbol[:offset]
+
 	return csymbol
 
 def generateQAM(N, side):
@@ -258,10 +261,15 @@ def generateISignal(symbol, ratio, subc):
 
 		complexIQs = np.array(complexIQs)
 		tempsp = np.fft.fft(complexIQs)
-		tempsp = np.fft.fftshift(tempsp)
+		tempsp = np.fft.fftshift(tempsp) 
+		# See: https://en.wikipedia.org/wiki/Discrete_Fourier_transform#/media/File:Fourier_transform,_Fourier_series,_DTFT,_DFT.svg
 
+		
 		tempSignals = []
+		tmp_offset = []
 		if ALIGNMENT[g] == 0:
+			# Multiply I and Q ZigBee signal with cos-wave and sin-wave, respectively.
+			# I donot understand it.
 			for jj in range(len(tempsp)):
 				comangle = 1*2*jj*np.pi*delta*1.0/WITHOUTCP
 				offset = [np.cos(comangle), np.sin(comangle)]
@@ -275,11 +283,13 @@ def generateISignal(symbol, ratio, subc):
 		for jj in range(groupbeforecp):
 			sp.append(np.complex64(tempSignals[jj][0]+tempSignals[jj][1]*1j))
 
+		# Only allows "2*subc" subcarriers in the middle of the spectum to be non-zero.
 		for i in range(len(sp)):
 			if abs(i - len(sp)/2) <= subc:
 				WholeSignals.append([sp[i].real,sp[i].imag])
 			else:
 				WholeSignals.append([0,0])
+
 	return WholeSignals
 
 
@@ -291,7 +301,9 @@ def generateQSignal(symbol, ratio, subc):
 	groupbeforecp = WITHOUTCP
 	delta = WITHCP - WITHOUTCP
 	Groups = length / groupsize
-	delta1 = WITHCP / 8
+	delta1 = WITHCP / 8 
+	# "deltal" is the duration of a half-chip signal flipping. 
+	# See the "solution" in section 5.2 of the original paper.
 
 	LeftWholeIQs = copy.deepcopy(WholeIQs)
 	RightWholeIQs = copy.deepcopy(WholeIQs)
