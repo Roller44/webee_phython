@@ -2,6 +2,10 @@ import numpy as np
 import copy
 import struct
 
+import pdb 
+import matplotlib.pylab as plt
+# Debugging.
+
 WITHCP = 80
 #WITHCP = 64
 WITHOUTCP = 64
@@ -25,9 +29,13 @@ def cycleshift(symbol, offset):
 		tsymbol[i] = symbol[i]
 
 	if offset >= 0:
+		# Left cyclic shift.
+		# e.g. when offset = 2, we have [1, 2, 3, 4, 5] -> [3, 4, 5, 1, 2]
 		csymbol = tsymbol[offset:]+tsymbol[:offset]
 		
 	if offset <= 0:
+		# Right cyclic shift.
+		# e.g. when offset = -2 , we have [1, 2, 3, 4, 5] -> [4, 5, 1, 2, 3]
 		offset = length + offset
 		csymbol = tsymbol[offset:]+tsymbol[:offset]
 
