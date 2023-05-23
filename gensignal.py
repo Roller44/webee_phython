@@ -274,7 +274,7 @@ def generateISignal(symbol, ratio, subc):
 		tempSignals = []
 		if ALIGNMENT[g] == 0:
 			# Multiply I and Q ZigBee signal with cos-wave and sin-wave, respectively.
-			# Effect: Time domain signal is cyclic left shifted 16 samples.
+			# Effect: Time domain inphase signal is cyclic left shifted 0.8us.
 			for jj in range(len(tempsp)):
 				comangle = 1*2*jj*np.pi*delta*1.0/WITHOUTCP
 				offset = [np.cos(comangle), np.sin(comangle)]
@@ -343,6 +343,8 @@ def generateQSignal(symbol, ratio, subc):
 		tempsp = np.fft.fft(complexIQs)
 		tempsp = np.fft.fftshift(tempsp)
 
+		# Cyclic left shift quadrature signal for 0.5us + 0.8us if ALIGMENT is 0.
+		# Cyclic right shift quadrature signal for 0.5us if ALIGMENT is 1.
 		tempSignals = []
 		for jj in range(len(tempsp)):
 			if ALIGNMENT[g] == 0:
