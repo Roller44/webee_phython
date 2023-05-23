@@ -272,10 +272,9 @@ def generateISignal(symbol, ratio, subc):
 
 		
 		tempSignals = []
-		tmp_offset = []
 		if ALIGNMENT[g] == 0:
 			# Multiply I and Q ZigBee signal with cos-wave and sin-wave, respectively.
-			# I donot understand it.
+			# Effect: Time domain signal is cyclic left shifted 16 samples.
 			for jj in range(len(tempsp)):
 				comangle = 1*2*jj*np.pi*delta*1.0/WITHOUTCP
 				offset = [np.cos(comangle), np.sin(comangle)]
@@ -296,6 +295,8 @@ def generateISignal(symbol, ratio, subc):
 			else:
 				WholeSignals.append([0,0])
 
+	# WoleSignals is a complex signal, instead of, suggested by the function name, a in-phase signal.
+	# Donnot know why.
 	return WholeSignals
 
 
