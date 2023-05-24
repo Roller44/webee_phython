@@ -58,16 +58,20 @@ def cycleshift(symbol, offset):
 	return csymbol
 
 def generateAllSymbols():
+	# This functon finds the standard WiFi QAM points that are the most similar to ideal
+	# WiFi sampling instances over all 16 ZigBee symbols.
 	subc = 5
 	ratio = float(1.0801) / 60
 	delta = float(1.0801 *2) / 14
 	ratio = ratio * 2
 	approxfftAllIQs = []
 	for symbol in range(16):
+		# Get in-phase component of ideal WiFi sampling instances of a given ZigBee symbol.
 		approxfftIs = gs.generateISignal(symbol, ratio, subc)
+		# Get quadrature component of ideal WiFi sampling instances of a given ZigBee symbol.
 		approxfftQs = gs.generateQSignal(symbol, ratio, subc)
+		
 		approxfftIQs = []
-
 		for i in range(len(approxfftIs)):
 			approxfftIQs.append([approxfftIs[i][0]+approxfftQs[i][0], approxfftIs[i][1]+approxfftQs[i][1]])
 	

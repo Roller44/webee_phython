@@ -64,6 +64,10 @@ def Edis(point1,point2):
 	return dis
 
 def approxQAM(qam, IQs):
+	# This fnction approximate the WiFi sampling instanceso ver a ZigBee symbol
+	# to standard WiFi QAM points.
+	# qam: values of all useable standard WiFi QAM points.
+	# IQs: ideal WiFi sampling instances over a ZigBee symbol.
 	N = len(IQs)
 	M = len(qam)
 	approxIQs = []
@@ -73,6 +77,8 @@ def approxQAM(qam, IQs):
 		if x1 == 0 and y1 == 0:
 			approxIQs.append([0,0])
 		else:
+			# Find the index of qam whose value is the most similar to a given ideal
+			# WiFi sampling instance.
 			mindis = 1000
 			minindex = -1
 			for j in range(M):
@@ -82,7 +88,9 @@ def approxQAM(qam, IQs):
 				if dis < mindis:
 					mindis = dis
 					minindex = j
+
 			approxIQs.append(qam[minindex])
+
 	return approxIQs
 
 def generateIQ(symbol, ratio):
