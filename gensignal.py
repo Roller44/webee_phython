@@ -40,6 +40,8 @@ def cycleshift(symbol, offset):
 	return csymbol
 
 def generateQAM(N, side):
+	# Generate all N possible QAM points (at WiFi).
+	# "side" is the maximum absolute values of inphase and quadrature.
 	qam = [[0,0] for i in range(N)]
 	m = int(np.sqrt(N))
 	interval = float(side * 2) / (m - 1)
