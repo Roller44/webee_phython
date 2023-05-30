@@ -25,7 +25,10 @@ def getSubsetandShift(signals, regionSize, shift, bandwidth):
 	return cutSignals
 
 def getSubsetandShift2(signals1, signals2, regionSize, shift1, shift2, bandwidth):
-	SIZE = 64
+	# This function mapps WiFi QAM points used to emulate 2 ZigBee signals from WiFi channel center
+	# where correpond to ZigBee channels 17 and 19.
+	# bandwith: number of WiFi subcarriers that actually used to emulate ZigBee signals.
+	SIZE = 64 # Sample size per WiFi symbol (excluding CP)
 	length = len(signals1)
 	Group = length / SIZE
 	cutSignals = [[0,0] for i in range(Group*regionSize)]
