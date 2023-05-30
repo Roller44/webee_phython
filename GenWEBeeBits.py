@@ -42,12 +42,12 @@ def getOtherSourceBits(indexes, CERegisters):
 def generalizedEuclidianAlgorithm(a, b):
 	if b > a:
 		#print a, b
-		return generalizedEuclidianAlgorithm(b,a);
+		return generalizedEuclidianAlgorithm(b,a)
 	elif b == 0:
-		return (1, 0);
+		return (1, 0)
 	else:
         #print a,b
-		(x, y) = generalizedEuclidianAlgorithm(b, a % b);
+		(x, y) = generalizedEuclidianAlgorithm(b, a % b)
 		return (y, x - (a / b) * y)
 
 def inversemodp(a, p):
@@ -55,7 +55,7 @@ def inversemodp(a, p):
 	if (a == 0):
 		#print "a is 0 mod p"
 		return 0
-	(x,y) = generalizedEuclidianAlgorithm(p, a % p);
+	(x,y) = generalizedEuclidianAlgorithm(p, a % p)
 	return y % p
 
 def identitymatrix(n):
@@ -83,7 +83,7 @@ def inversematrix(A):
 				else:
 					i = i + 1
 					if i == N:
-						print "NOT INVERSEABLE"
+						print("NOT INVERSEABLE")
 		for I in range (0, N):
 			if (I!=K):
 				if (A[I][K]):
