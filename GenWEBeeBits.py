@@ -161,8 +161,8 @@ def MultiplyXORMatrix(A, B):
 			res[i][j] = XOR(temp)
 	return res
 
-#generate ce mapping table
-NCBPS = 288
+#generate converlutional encoding mapping table
+NCBPS = 288 # Number of coded bits per symbol
 
 T1 = [0, -2, -3, -5, -6]
 T2 = [0, -1, -2, -3, -6]
@@ -177,6 +177,7 @@ for i in range(NCBPS/3 + 1):
 		for k in range(5):
 			tempY[j*2+0][k] = t + T1[k] + 1
 			tempY[j*2+1][k] = t + T2[k] + 1
+
 	if totalY < NCBPS:
 		for k in range(5):
 			CETable[totalY].append(tempY[0][k])
@@ -195,14 +196,17 @@ for i in range(NCBPS/3 + 1):
 	totalY = totalY + 1
 
 #generate interleving mapping
-NCBPS = 288
-s = 3
+NCBPS = 288 # Number of coded bits per symbol
+s = 3 # =max(NCBPS/2, 1)
+# Indices of bits after interleaving. 
+# Here, the k-th bit will be move to the position where the j-th bit at.
 permutation = [0 for i in range(NCBPS)]
 for k in range(NCBPS):
 	i = (NCBPS / 16) * (k % 16) + k / 16
 	j = s * (i / s) + (i + NCBPS - ((16 * i) / NCBPS)) % s
 	permutation[k] = j
-
+# Retrace the original indices of each permutated/interleaved bits. 
+# For example, it will show that the j-th permutated bit is the original k-th bit.
 reverseperm = [0 for i in range(NCBPS)]
 for k in range(NCBPS):
 	reverseperm[permutation[k]] = k
@@ -252,12 +256,15 @@ for qamkk in range(100):
 	NWEBeeSybols = len(alloutputbits)
 
 	#build the bigraph
+	# For each WiFi symbol, the index of bits that will be modulated as emulated 
+	# ZigBee signal. Here the bits are assumed to be permutated.
 	ReverseIndex = []
 	symbols = len(alloutputbits[0])
 	for i in range(symbols):
 		if not alloutputbits[0][i] == 2:
 			ReverseIndex.append(i)
-
+	# The original index of each bit that will be modulated as emulated ZigBee
+	# signal before it is permutated.
 	Z = []
 	for i in range(len(ReverseIndex)):
 		Z.append(reverseperm[ReverseIndex[i]])
