@@ -63,9 +63,12 @@ def identitymatrix(n):
 
 def inversematrix(A):
 	N = len(A)
+
+	# Generate a N*N identity matrix.
 	B = [[0 for i in range(N)] for j in range(N)]
 	for i in range(N):
 		B[i][i] = 1
+
 	for K in range (0, N):
 		if (A[K][K] == 0):
 			flag = 1

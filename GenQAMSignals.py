@@ -25,12 +25,12 @@ def getSubsetandShift(signals, regionSize, shift, bandwidth):
 	return cutSignals
 
 def getSubsetandShift2(signals1, signals2, regionSize, shift1, shift2, bandwidth):
-	# This function mapps WiFi QAM points used to emulate 2 ZigBee signals from WiFi channel center
+	# This function mapps WiFi QAM points used to emulate 2 ZigBee signals from WiFi channel center to
 	# where correpond to ZigBee channels 17 and 19.
 	# bandwith: number of WiFi subcarriers that actually used to emulate ZigBee signals.
 	SIZE = 64 # Sample size per WiFi symbol (excluding CP)
 	length = len(signals1)
-	Group = length / SIZE
+	Group = length / SIZE # Number of WiFi symbols used to emulate one ZigBee symbol.
 	cutSignals = [[0,0] for i in range(Group*regionSize)]
 	delta = bandwidth / 2
 	for i in range(Group):
@@ -179,6 +179,12 @@ if __name__ == "__main__":
 	for i in range(100):
 		filename = "./data/WEBeeQAMs"+str(i)+".txt"
 		qamfile = open(filename, "w")
+
+		# Generate two ZigBee packets. 
+		# One will be transmitted on ZigBee channel 17, another will be transmitted
+		# on Zigbee channel 19.
+		# Here, each packet only contains a number in its payload.
+		# Payloads of two ZigBee packets are the same.
 		payload = generateFixedPayload(LoadLen, i)
 		macload = generateMacPacket(payload, i)
 		phyload = generatePhyPacket(macload)
