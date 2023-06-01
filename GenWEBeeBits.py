@@ -155,6 +155,8 @@ def inversematrix(A):
 # 	return A_invert
 
 def SolveXOREquations(A, Y):
+	# This function multiplies a given matrix, A, to a given 
+	# vector, Y, in GF(2) field.
 	N = len(Y)
 	res = [0 for i in range(N)]
 	for i in range(N):
@@ -429,19 +431,22 @@ for qamkk in range(100):
 			Y[i] = XOR(getOtherSourceBits(Right[i][0], CERegisters)+[correctbit])
 		
 		TY = [0 for i in range(WEBeeBits)] 
+
+		# Reverse the convolutional encoding: find uncoded bits corresponding to coded bits 
+		# that used to emulate ZigBee signals.
 		CX = SolveXOREquations(A_invert, Y)
 		# Y1 = SolveXOREquations(Matrix, CX)
 
 		# for ii in range(len(Y)):
 		# 	if not Y[ii] == Y1[ii]:
 		# 		print "EEEEEEE"
-		
 		for i in range(WEBeeBits):
 			if (i+1) in XS:
 				cx = CX[Xdict[i+1]]
 				SourceBits[i] = cx
 			else:
-				SourceBits[i] = getOtherSourceBit(i)
+				SourceBits[i] = getOtherSourceBit(i) # Set it to 0
+
 		for i in range(len(CERegisters)):
 			CERegisters[i] = SourceBits[WEBeeBits - i - 1]
 		
@@ -449,6 +454,7 @@ for qamkk in range(100):
 			sourceFile.write(str(SourceBits[b]))
 			if b < len(SourceBits) - 1:
 				sourceFile.write(",")
+
 		sourceFile.write("\n")
 
 	sourceFile.close()
