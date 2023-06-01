@@ -18,10 +18,12 @@ def bitxor(a,b):
 		return 1
 
 def XOR(bits):
+	# For now, this function returns the last bit in its input, "bits".
 	N = len(bits)
 	resbit = 0
 	for i in range(N):
 		resbit = bitxor(resbit,bits[i])
+
 	return resbit
 
 def getOtherSourceBit(index):
@@ -62,6 +64,9 @@ def identitymatrix(n):
 	return [[long(x == y) for x in range(0, n)] for y in range(0, n)]
 
 def inversematrix(A):
+	# This function calculate the inverse of a given matrix, A, via Gaussian
+	# elimination method.
+	# https://en.wikipedia.org/wiki/Invertible_matrix#Gaussian_elimination
 	N = len(A)
 
 	# Generate a N*N identity matrix.
@@ -75,6 +80,7 @@ def inversematrix(A):
 			i = K + 1
 			while(flag):
 				if (A[i][K]!=0):
+					# Swap the K-th row and the i-th row.
 					for L in range (0, N):
 						s = A[K][L]
 						A[K][L] = A[i][L]
@@ -87,12 +93,17 @@ def inversematrix(A):
 					i = i + 1
 					if i == N:
 						print("NOT INVERSEABLE")
+
 		for I in range (0, N):
 			if (I!=K):
 				if (A[I][K]):
 					for M in range (0, N):
+						# "^" means XOR operator
+						# The reason of adopting XOR operator is that the 
+						# matrix is in GF(2) field (according to the WEBee paper).
 						A[I][M] = A[I][M] ^ A[K][M]
 						B[I][M] = B[I][M] ^ B[K][M]
+
 	return B
 
 # def findinvert(a, p):
@@ -170,7 +181,7 @@ NCBPS = 288 # Number of coded bits per symbol
 T1 = [0, -2, -3, -5, -6]
 T2 = [0, -1, -2, -3, -6]
 
-CETable = [[] for i in range(NCBPS)]
+CETable = [[] for i in range(NCBPS)] # Elements in the table are indices of uncoded bits.
 
 totalY = 0
 for i in range(NCBPS/3 + 1):
@@ -180,25 +191,34 @@ for i in range(NCBPS/3 + 1):
 		for k in range(5):
 			tempY[j*2+0][k] = t + T1[k] + 1
 			tempY[j*2+1][k] = t + T2[k] + 1
-
+	
+	# The idea of the following code: puncturing in convolutional encoding with 3/4 rate.
+	# Puncturing here: for every 6 bits coded with 1/2 rate, omit the 4-th and 5-th bits.
 	if totalY < NCBPS:
 		for k in range(5):
 			CETable[totalY].append(tempY[0][k])
+
 	totalY = totalY + 1
+
 	if totalY < NCBPS:
 		for k in range(5):
 			CETable[totalY].append(tempY[1][k])
+
 	totalY = totalY + 1
+
 	if totalY < NCBPS:
 		for k in range(5):
 			CETable[totalY].append(tempY[2][k])
+
 	totalY = totalY + 1
+
 	if totalY < NCBPS:
 		for k in range(5):
 			CETable[totalY].append(tempY[5][k])
+
 	totalY = totalY + 1
 
-#generate interleving mapping
+# Generate interleving mapping (table).
 NCBPS = 288 # Number of coded bits per symbol
 s = 3 # =max(NCBPS/2, 1)
 # Indices of bits after interleaving. 
@@ -228,12 +248,12 @@ qamtable.update({0: [2,2,2]})
 
 
 for qamkk in range(100):
-	QAMPoints = 48
-	alloutputbits = []
+	QAMPoints = 48 # Number of QAM points, which is equal to number of WiFi data subcarriers.
+	alloutputbits = [] # All WiFi bits that will be imputted to WiFi modulator to emulated a ZigBee packet.
 	filename = "./data/WEBeeQAMs"+str(qamkk)+".txt"
 	qamFile = open(filename, "r")
 	index = 0
-	outputbits = []
+	outputbits = [] # WiFi bits per WiFi data symbol that will be used to emulated a ZigBee packet.
 	for line in qamFile.readlines():
 		strline = line.split(',')
 		real = float(strline[0])
@@ -256,7 +276,7 @@ for qamkk in range(100):
 		outputbits = []
 		index = 0
 
-	NWEBeeSybols = len(alloutputbits)
+	NWEBeeSybols = len(alloutputbits) # Number of WiFi data symbols.
 
 	#build the bigraph
 	# For each WiFi symbol, the index of bits that will be modulated as emulated 
@@ -363,7 +383,6 @@ for qamkk in range(100):
 	for i in range(Rows):
 		Right[i] = [Right[i],[Z[i]]]
 
-
 	XSSize = len(XS)
 	Xdict = {}
 	for i in range(XSSize):
@@ -392,14 +411,15 @@ for qamkk in range(100):
 	# # 		print 'NO INVERSE'
 
 
-	NWEBeeSymbols = len(alloutputbits)
+	NWEBeeSymbols = len(alloutputbits) # Number of WiFi data symbols.
 
-	WEBeeBits = NCBPS * 3 / 4
+	WEBeeBits = NCBPS * 3 / 4 # Number of bits before convolutional encoding with a coding rate of 3/4.
 
 	CERegisters = [0,0,0,0,0,0,0]
 	packetfile = "./data/WEBeeBits"+str(qamkk)+".txt"
 	sourceFile = open(packetfile, "w")
 	#print NWEBeeSymbols
+	# Operations for each WiFi data symbol.
 	for sym in range(NWEBeeSymbols):
 		Y = [0 for i in range(M)]
 		temp = []
