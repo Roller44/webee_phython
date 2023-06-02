@@ -18,10 +18,12 @@ def bitxor(a,b):
 		return 1
 
 def XOR(bits):
+	# For now, this function returns the last bit in its input, "bits".
 	N = len(bits)
 	resbit = 0
 	for i in range(N):
 		resbit = bitxor(resbit,bits[i])
+
 	return resbit
 
 def getOtherSourceBit(index):
@@ -42,12 +44,12 @@ def getOtherSourceBits(indexes, CERegisters):
 def generalizedEuclidianAlgorithm(a, b):
 	if b > a:
 		#print a, b
-		return generalizedEuclidianAlgorithm(b,a);
+		return generalizedEuclidianAlgorithm(b,a)
 	elif b == 0:
-		return (1, 0);
+		return (1, 0)
 	else:
         #print a,b
-		(x, y) = generalizedEuclidianAlgorithm(b, a % b);
+		(x, y) = generalizedEuclidianAlgorithm(b, a % b)
 		return (y, x - (a / b) * y)
 
 def inversemodp(a, p):
@@ -55,23 +57,30 @@ def inversemodp(a, p):
 	if (a == 0):
 		#print "a is 0 mod p"
 		return 0
-	(x,y) = generalizedEuclidianAlgorithm(p, a % p);
+	(x,y) = generalizedEuclidianAlgorithm(p, a % p)
 	return y % p
 
 def identitymatrix(n):
 	return [[long(x == y) for x in range(0, n)] for y in range(0, n)]
 
 def inversematrix(A):
+	# This function calculate the inverse of a given matrix, A, via Gaussian
+	# elimination method.
+	# https://en.wikipedia.org/wiki/Invertible_matrix#Gaussian_elimination
 	N = len(A)
+
+	# Generate a N*N identity matrix.
 	B = [[0 for i in range(N)] for j in range(N)]
 	for i in range(N):
 		B[i][i] = 1
+
 	for K in range (0, N):
 		if (A[K][K] == 0):
 			flag = 1
 			i = K + 1
 			while(flag):
 				if (A[i][K]!=0):
+					# Swap the K-th row and the i-th row.
 					for L in range (0, N):
 						s = A[K][L]
 						A[K][L] = A[i][L]
@@ -83,13 +92,18 @@ def inversematrix(A):
 				else:
 					i = i + 1
 					if i == N:
-						print "NOT INVERSEABLE"
+						print("NOT INVERSEABLE")
+
 		for I in range (0, N):
 			if (I!=K):
 				if (A[I][K]):
 					for M in range (0, N):
+						# "^" means XOR operator
+						# The reason of adopting XOR operator is that the 
+						# matrix is in GF(2) field (according to the WEBee paper).
 						A[I][M] = A[I][M] ^ A[K][M]
 						B[I][M] = B[I][M] ^ B[K][M]
+
 	return B
 
 # def findinvert(a, p):
@@ -141,6 +155,8 @@ def inversematrix(A):
 # 	return A_invert
 
 def SolveXOREquations(A, Y):
+	# This function multiplies a given matrix, A, to a given 
+	# vector, Y, in GF(2) field.
 	N = len(Y)
 	res = [0 for i in range(N)]
 	for i in range(N):
@@ -161,13 +177,13 @@ def MultiplyXORMatrix(A, B):
 			res[i][j] = XOR(temp)
 	return res
 
-#generate ce mapping table
-NCBPS = 288
+#generate converlutional encoding mapping table
+NCBPS = 288 # Number of coded bits per symbol
 
 T1 = [0, -2, -3, -5, -6]
 T2 = [0, -1, -2, -3, -6]
 
-CETable = [[] for i in range(NCBPS)]
+CETable = [[] for i in range(NCBPS)] # Elements in the table are indices of uncoded bits.
 
 totalY = 0
 for i in range(NCBPS/3 + 1):
@@ -177,32 +193,45 @@ for i in range(NCBPS/3 + 1):
 		for k in range(5):
 			tempY[j*2+0][k] = t + T1[k] + 1
 			tempY[j*2+1][k] = t + T2[k] + 1
+	
+	# The idea of the following code: puncturing in convolutional encoding with 3/4 rate.
+	# Puncturing here: for every 6 bits coded with 1/2 rate, omit the 4-th and 5-th bits.
 	if totalY < NCBPS:
 		for k in range(5):
 			CETable[totalY].append(tempY[0][k])
+
 	totalY = totalY + 1
+
 	if totalY < NCBPS:
 		for k in range(5):
 			CETable[totalY].append(tempY[1][k])
+
 	totalY = totalY + 1
+
 	if totalY < NCBPS:
 		for k in range(5):
 			CETable[totalY].append(tempY[2][k])
+
 	totalY = totalY + 1
+
 	if totalY < NCBPS:
 		for k in range(5):
 			CETable[totalY].append(tempY[5][k])
+
 	totalY = totalY + 1
 
-#generate interleving mapping
-NCBPS = 288
-s = 3
+# Generate interleving mapping (table).
+NCBPS = 288 # Number of coded bits per symbol
+s = 3 # =max(NCBPS/2, 1)
+# Indices of bits after interleaving. 
+# Here, the k-th bit will be move to the position where the j-th bit at.
 permutation = [0 for i in range(NCBPS)]
 for k in range(NCBPS):
 	i = (NCBPS / 16) * (k % 16) + k / 16
 	j = s * (i / s) + (i + NCBPS - ((16 * i) / NCBPS)) % s
 	permutation[k] = j
-
+# Retrace the original indices of each permutated/interleaved bits. 
+# For example, it will show that the j-th permutated bit is the original k-th bit.
 reverseperm = [0 for i in range(NCBPS)]
 for k in range(NCBPS):
 	reverseperm[permutation[k]] = k
@@ -221,12 +250,13 @@ qamtable.update({0: [2,2,2]})
 
 
 for qamkk in range(100):
-	QAMPoints = 48
-	alloutputbits = []
+	QAMPoints = 48 # Number of QAM points, which is equal to number of WiFi data subcarriers.
+	alloutputbits = [] # All WiFi bits that will be imputted to WiFi modulator to emulated a ZigBee packet.
 	filename = "./data/WEBeeQAMs"+str(qamkk)+".txt"
 	qamFile = open(filename, "r")
 	index = 0
-	outputbits = []
+	outputbits = [] # WiFi bits per WiFi data symbol that will be used to emulated a ZigBee packet.
+	# Demodulate each of 48 subcarriers
 	for line in qamFile.readlines():
 		strline = line.split(',')
 		real = float(strline[0])
@@ -249,15 +279,18 @@ for qamkk in range(100):
 		outputbits = []
 		index = 0
 
-	NWEBeeSybols = len(alloutputbits)
+	NWEBeeSybols = len(alloutputbits) # Number of WiFi data symbols.
 
 	#build the bigraph
+	# For each WiFi symbol, the index of bits that will be modulated as emulated 
+	# ZigBee signal. Here the bits are assumed to be permutated.
 	ReverseIndex = []
 	symbols = len(alloutputbits[0])
 	for i in range(symbols):
 		if not alloutputbits[0][i] == 2:
 			ReverseIndex.append(i)
-
+	# The original index of each bit that will be modulated as emulated ZigBee
+	# signal before it is permutated.
 	Z = []
 	for i in range(len(ReverseIndex)):
 		Z.append(reverseperm[ReverseIndex[i]])
@@ -338,6 +371,7 @@ for qamkk in range(100):
 	Rows = M
 	Left = []
 	Right = []
+	# The i-th row of "Right" indicates the indices of uncoded bits that will be encoded as the i-th coded bit.
 	for i in range(Rows):
 		Left.append([])
 		Right.append(copy.deepcopy(CETable[Z[i]]))
@@ -353,11 +387,13 @@ for qamkk in range(100):
 	for i in range(Rows):
 		Right[i] = [Right[i],[Z[i]]]
 
-
 	XSSize = len(XS)
 	Xdict = {}
 	for i in range(XSSize):
 		Xdict.update({XS[i]:i})
+
+	import pdb
+	pdb.set_trace()
 
 	MatrixRows = Rows
 	MatrixCols = XSSize
@@ -382,14 +418,15 @@ for qamkk in range(100):
 	# # 		print 'NO INVERSE'
 
 
-	NWEBeeSymbols = len(alloutputbits)
+	NWEBeeSymbols = len(alloutputbits) # Number of WiFi data symbols.
 
-	WEBeeBits = NCBPS * 3 / 4
+	WEBeeBits = NCBPS * 3 / 4 # Number of bits before convolutional encoding with a coding rate of 3/4.
 
 	CERegisters = [0,0,0,0,0,0,0]
 	packetfile = "./data/WEBeeBits"+str(qamkk)+".txt"
 	sourceFile = open(packetfile, "w")
 	#print NWEBeeSymbols
+	# Operations for each WiFi data symbol.
 	for sym in range(NWEBeeSymbols):
 		Y = [0 for i in range(M)]
 		temp = []
@@ -399,19 +436,22 @@ for qamkk in range(100):
 			Y[i] = XOR(getOtherSourceBits(Right[i][0], CERegisters)+[correctbit])
 		
 		TY = [0 for i in range(WEBeeBits)] 
+
+		# Reverse the convolutional encoding: find uncoded bits corresponding to coded bits 
+		# that used to emulate ZigBee signals.
 		CX = SolveXOREquations(A_invert, Y)
 		# Y1 = SolveXOREquations(Matrix, CX)
 
 		# for ii in range(len(Y)):
 		# 	if not Y[ii] == Y1[ii]:
 		# 		print "EEEEEEE"
-		
 		for i in range(WEBeeBits):
 			if (i+1) in XS:
 				cx = CX[Xdict[i+1]]
 				SourceBits[i] = cx
 			else:
-				SourceBits[i] = getOtherSourceBit(i)
+				SourceBits[i] = getOtherSourceBit(i) # Set it to 0
+
 		for i in range(len(CERegisters)):
 			CERegisters[i] = SourceBits[WEBeeBits - i - 1]
 		
@@ -419,6 +459,7 @@ for qamkk in range(100):
 			sourceFile.write(str(SourceBits[b]))
 			if b < len(SourceBits) - 1:
 				sourceFile.write(",")
+
 		sourceFile.write("\n")
 
 	sourceFile.close()

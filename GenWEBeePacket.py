@@ -37,9 +37,9 @@ for i in range(PADBITS):
 	SourceBits.insert(0, 0)
 M = len(SourceBits)
 
+# Descrambling
 out_bits = [0 for i in range(M)]
 state = [1,0,0,1,0,0,0]
-
 for i in range(7, M):
 	feedback = state[3] ^ state[6]
 	out_bits[i] = SourceBits[i] ^ feedback
@@ -47,7 +47,7 @@ for i in range(7, M):
 	state[0] = feedback
 
 
-ST = M / 8
+ST = M / 8 # Number of bytes.
 wifiFiles.write("%d" %(ST-2))
 wifiFiles.write("\r\n")
 
@@ -62,35 +62,46 @@ for qamkk in range(100):
 
 	KK = len(SourceBits) / 8
 
-	#pad some bits
+	# Pad "PADBITS" bits at the beginning of the bit sequence.
+	# Latter the bits' order will be flipped so the the padded bits are at 
+	# the end of packet.
 	PADBITS = 8*27
 	for i in range(PADBITS):
 		SourceBits.insert(0, 0)
 	M = len(SourceBits)
 
+	# Descrembling.
 	out_bits = [0 for i in range(M)]
 	state = [1,0,0,1,0,0,0]
-
 	for i in range(7, M):
 		feedback = state[3] ^ state[6]
 		out_bits[i] = SourceBits[i] ^ feedback
 		state[1:7] = state[0:6]
 		state[0] = feedback
 
+	# Flip the order of each byte and then convert it to a hexadecimal number.
 	for i in range(2,ST):
+		# For each chunk of 8 bits, flip its order.
 		bits = [0 for j in range(8)]
 		for j in range(8):
 			bits[7-j] = out_bits[i*8 + j]
+
+		# Convert the flipped bit chunk to a hexadecimal number.
 		strbit = ""
 		for k in range(4):
 			strbit =  strbit + str(bits[k])
 		high = getSym(strbit)
+
 		strbit = ""
 		for k in range(4,8):
 			strbit =  strbit + str(bits[k])
 		low = getSym(strbit)
+
 		strn = str(high * 16 + low)
+
+		# Wirte the hexadecimal number into file.
 		wifiFiles.write(strn+',')
+
 	wifiFiles.write("\r\n")
 
 wifiFiles.close()
