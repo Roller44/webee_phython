@@ -256,6 +256,7 @@ for qamkk in range(100):
 	qamFile = open(filename, "r")
 	index = 0
 	outputbits = [] # WiFi bits per WiFi data symbol that will be used to emulated a ZigBee packet.
+	# Demodulate each of 48 subcarriers
 	for line in qamFile.readlines():
 		strline = line.split(',')
 		real = float(strline[0])
@@ -370,6 +371,7 @@ for qamkk in range(100):
 	Rows = M
 	Left = []
 	Right = []
+	# The i-th row of "Right" indicates the indices of uncoded bits that will be encoded as the i-th coded bit.
 	for i in range(Rows):
 		Left.append([])
 		Right.append(copy.deepcopy(CETable[Z[i]]))
@@ -389,6 +391,9 @@ for qamkk in range(100):
 	Xdict = {}
 	for i in range(XSSize):
 		Xdict.update({XS[i]:i})
+
+	import pdb
+	pdb.set_trace()
 
 	MatrixRows = Rows
 	MatrixCols = XSSize
