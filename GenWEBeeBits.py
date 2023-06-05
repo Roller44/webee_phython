@@ -18,7 +18,7 @@ def bitxor(a,b):
 		return 1
 
 def XOR(bits):
-	# For now, this function returns the last bit in its input, "bits".
+	# This function computes XOR of bits in a given sequence named "bits".
 	N = len(bits)
 	resbit = 0
 	for i in range(N):
@@ -30,15 +30,19 @@ def getOtherSourceBit(index):
 	return 0
 
 def getOtherSourceBits(indexes, CERegisters):
+	# This function apply the effect of coding of last symbol to the correct symbol.
 	L = len(indexes)
 	res = [0 for i in range(L)]
 	for i in range(L):
 		index = indexes[i]
 		if index <= 0:
+			# The ith coded bit (in "Y[i]") is effected by bits of the last symbol, of which
+			# copies are left in CERegisters.
 			index1 = int(-1*index)
 			res[i] = CERegisters[index1]
 		else:
 			res[i] = getOtherSourceBit(index)
+
 	return res
 
 def generalizedEuclidianAlgorithm(a, b):
@@ -392,9 +396,6 @@ for qamkk in range(100):
 	for i in range(XSSize):
 		Xdict.update({XS[i]:i})
 
-	import pdb
-	pdb.set_trace()
-
 	MatrixRows = Rows
 	MatrixCols = XSSize
 
@@ -432,7 +433,10 @@ for qamkk in range(100):
 		temp = []
 		SourceBits = [0 for i in range(WEBeeBits)]
 		for i in range(M):
-			correctbit = alloutputbits[sym][permutation[Z[i]]]
+			# The "correctbit" below is the ith bit that will be fed into mudulator to 
+			# emulate ZigBee signals.
+			correctbit = alloutputbits[sym][permutation[Z[i]]] 
+			# The Y[i] below is the i-th coded bit.
 			Y[i] = XOR(getOtherSourceBits(Right[i][0], CERegisters)+[correctbit])
 		
 		TY = [0 for i in range(WEBeeBits)] 
