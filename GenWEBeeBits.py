@@ -240,7 +240,6 @@ reverseperm = [0 for i in range(NCBPS)]
 for k in range(NCBPS):
 	reverseperm[permutation[k]] = k
 
-
 qaminteger = [-7,-5,-3,-1,1,3,5,7]
 qamdict = {}
 delta = float(1.0801 * 2) / 7

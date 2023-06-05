@@ -125,9 +125,12 @@ def generateMacPacket(load, seq_nr):
 	for i in range(len(d_msg) / 2):
 		temp[2*i] = d_msg[2*i+1]
 		temp[2*i+1] = d_msg[2*i]
+
 	data = ''
 	for i in range(len(temp)):
+		# Number to string convertion.
 		data += '%x'%temp[i]
+		
 	crc = 0
 	target = bytearray.fromhex(data)
 	crc = CRC16Kermit().calculate(target)
