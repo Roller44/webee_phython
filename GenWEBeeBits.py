@@ -307,11 +307,11 @@ for qamkk in range(100):
 	# XS = []
 	# G = [[] for i in range(M)]
 	# for i in range(M):
-	#  	for k in range(len(CETable[Z[i]])):
-	#  		if CETable[Z[i]][k] > 0:
-	#  			G[i].append(CETable[Z[i]][k])
-	#  			if not CETable[Z[i]][k] in XS:
-	#  				XS.append(CETable[Z[i]][k])
+	# 	for k in range(len(CETable[Z[i]])):
+	# 		if CETable[Z[i]][k] > 0:
+	# 			G[i].append(CETable[Z[i]][k])
+	# 			if not CETable[Z[i]][k] in XS:
+	# 				XS.append(CETable[Z[i]][k])
 
 	# # XS correct
 
@@ -378,6 +378,16 @@ for qamkk in range(100):
 	for i in range(Rows):
 		Left.append([])
 		Right.append(copy.deepcopy(CETable[Z[i]]))
+	
+	for ith in range(len(CETable)):
+		print(CETable[ith])
+	
+	print("******************************************************")
+	for ith in range(len(Right)):
+		print(Right[ith])
+
+	import pdb
+	pdb.set_trace()
 
 	for i in range(len(XS)):
 		x = XS[i]
@@ -407,7 +417,11 @@ for qamkk in range(100):
 
 	#print gf.matrix_rank(np.matrix(Matrix))
 	tempMatrix = copy.deepcopy(Matrix)
+	for ith in range(len(tempMatrix)):
+		print(tempMatrix[ith])
+
 	A_invert = inversematrix(tempMatrix)
+	pdb.set_trace()
 	#print A_invert
 	#print gf.matrix_rank(np.matrix(A_invert))
 
@@ -443,6 +457,7 @@ for qamkk in range(100):
 		# Reverse the convolutional encoding: find uncoded bits corresponding to coded bits 
 		# that used to emulate ZigBee signals.
 		CX = SolveXOREquations(A_invert, Y)
+		pdb.set_trace()
 		# Y1 = SolveXOREquations(Matrix, CX)
 
 		# for ii in range(len(Y)):
