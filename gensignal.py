@@ -9,7 +9,7 @@ import matplotlib.pylab as plt
 WITHCP = 80
 #WITHCP = 64
 WITHOUTCP = 64
-SAMPLERATE = WITHCP / 4
+SAMPLERATE = int(WITHCP / 4)
 
 ALIGNMENT = [1,0,1,0] #1 means RIGHT and 0 means LEFT
 
