@@ -189,6 +189,7 @@ def generateIQ(symbol, ratio):
 		for j in range(int(SampleRate)):
 			X.append(i*np.pi + j*np.pi / SampleRate)
 
+	# test_waves = []
 	# Set value of each WiFi sampling instance.
 	for i in range(len(X)):
 		# Figure out which chip_seq the i-th sampling instance belongs to.
@@ -214,8 +215,11 @@ def generateIQ(symbol, ratio):
 		else:
 			Qbit = -1
 
-		Iphase = Ibit*np.sin(x - Iindex * np.pi)
-		Qphase = Qbit*np.sin(x - np.pi / 2 - Qindex * np.pi)
+		Iphase = Ibit*np.sin(x - int(Iindex) * np.pi)
+		Qphase = Qbit*np.sin(x - np.pi / 2 - int(Qindex) * np.pi)
+		
+		# test_i = np.sin(x - int(Iindex) * np.pi)
+		# test_q = np.sin(x - np.pi / 2 - int(Qindex) * np.pi)
 
 		if abs(Iphase) < 0.01:
 			Iphase = 0
@@ -225,7 +229,30 @@ def generateIQ(symbol, ratio):
 		Iphase = Iphase * ratio
 		Qphase = Qphase * ratio
 		IQs.append([Iphase,Qphase])
+		# test_waves.append([test_i, test_q])
+	
 
+	# i_wave = []
+	# q_wave = []
+	# test_i_wave = []
+	# test_q_wave = []
+	# for ith in range(len(X)):
+	# 	i_wave.append(IQs[ith][0])
+	# 	q_wave.append(IQs[ith][1])
+	# 	test_i_wave.append(test_waves[ith][0])
+	# 	test_q_wave.append(test_waves[ith][1])
+
+	# plt.figure(0)
+	# plt.plot(i_wave)
+	# plt.plot(q_wave)
+	# plt.show()
+	# plt.figure(1)
+	# plt.plot(test_i_wave)
+	# plt.plot(test_q_wave)
+	# plt.show()
+
+	# import pdb
+	# pdb.set_trace()
 	return IQs
 
 
@@ -355,6 +382,10 @@ def generateISignal(symbol, ratio, subc):
 
 	# WoleSignals is a complex signal, instead of, suggested by the function name, a in-phase signal.
 	# Donnot know why.
+	# print(WholeSignals)
+	# import pdb
+	# pdb.set_trace()
+
 	return WholeSignals
 
 

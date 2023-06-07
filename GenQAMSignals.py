@@ -14,7 +14,7 @@ def getHex(x):
 def getSubsetandShift(signals, regionSize, shift, bandwidth):
 	SIZE = 64
 	length = len(signals)
-	Group = length / SIZE
+	Group = int(length / SIZE)
 	cutSignals = [[0,0] for i in range(Group*regionSize)]
 	delta = bandwidth / 2
 	for i in range(Group):
@@ -30,21 +30,21 @@ def getSubsetandShift2(signals1, signals2, regionSize, shift1, shift2, bandwidth
 	# bandwith: number of WiFi subcarriers that actually used to emulate ZigBee signals.
 	SIZE = 64 # Sample size per WiFi symbol (excluding CP)
 	length = len(signals1)
-	Group = length / SIZE # Number of WiFi symbols used to emulate one ZigBee symbol.
+	Group = int(length / SIZE) # Number of WiFi symbols used to emulate one ZigBee symbol.
 	cutSignals = [[0,0] for i in range(Group*regionSize)]
-	delta = bandwidth / 2
+	delta = int(bandwidth / 2)
 	for i in range(Group):
-		partSignals1 = copy.deepcopy(signals1[i*SIZE+SIZE/2-delta:i*SIZE+SIZE/2+delta+1])
+		partSignals1 = copy.deepcopy(signals1[i*SIZE+int(SIZE/2)-delta:i*SIZE+int(SIZE/2)+delta+1])
 		N = len(partSignals1)
 		for j in range(-delta,delta+1):
-			cutSignals[i*regionSize + regionSize / 2 + shift1 + j][0] = partSignals1[j+delta][0]
-			cutSignals[i*regionSize + regionSize / 2 + shift1 + j][1] = partSignals1[j+delta][1]
+			cutSignals[i*regionSize + int(regionSize / 2) + shift1 + j][0] = partSignals1[j+delta][0]
+			cutSignals[i*regionSize + int(regionSize / 2) + shift1 + j][1] = partSignals1[j+delta][1]
 		
-		partSignals2 = copy.deepcopy(signals2[i*SIZE+SIZE/2-delta:i*SIZE+SIZE/2+delta+1])
+		partSignals2 = copy.deepcopy(signals2[i*SIZE+int(SIZE/2)-delta:i*SIZE+int(SIZE/2)+delta+1])
 		N = len(partSignals2)
 		for j in range(-delta,delta+1):
-			cutSignals[i*regionSize + regionSize / 2 + shift2 + j][0] = partSignals2[j+delta][0]
-			cutSignals[i*regionSize + regionSize / 2 + shift2 + j][1] = partSignals2[j+delta][1]
+			cutSignals[i*regionSize + int(regionSize / 2) + shift2 + j][0] = partSignals2[j+delta][0]
+			cutSignals[i*regionSize + int(regionSize / 2) + shift2 + j][1] = partSignals2[j+delta][1]
 
 	return cutSignals
 
@@ -53,6 +53,8 @@ def cycleshift(symbol, offset):
 	tsymbol = [0 for i in range(length)]
 	for i in range(length):
 		tsymbol[i] = symbol[i]
+
+	csymbol = 0
 	if offset >= 0:
 		csymbol = tsymbol[offset:]+tsymbol[:offset]
 	if offset <= 0:
@@ -99,8 +101,8 @@ def generateMacPacket(load, seq_nr):
 	d_msg.append(4)
 	d_msg.append(8)
 	d_msg.append(8)
-	d_msg.append((seq_nr & 0xFF) % 16)
-	d_msg.append((seq_nr & 0xFF) / 16)
+	d_msg.append(int((seq_nr & 0xFF) % 16))
+	d_msg.append(int((seq_nr & 0xFF) / 16))
 	d_msg.append(2)
 	d_msg.append(2)
 	d_msg.append(0)
@@ -122,22 +124,22 @@ def generateMacPacket(load, seq_nr):
 		d_msg.append(load[i])
 	
 	temp = [0 for i in range(len(d_msg))]
-	for i in range(len(d_msg) / 2):
+	for i in range(int(len(d_msg) / 2)):
 		temp[2*i] = d_msg[2*i+1]
 		temp[2*i+1] = d_msg[2*i]
 
 	data = ''
 	for i in range(len(temp)):
 		# Number to string convertion.
-		data += '%x'%temp[i]
+		data += '%x'%int(temp[i])
 		
-	crc = 0
 	target = bytearray.fromhex(data)
 	crc = CRC16Kermit().calculate(target)
-	d_msg.append((crc >> 8) % 16)
-	d_msg.append((crc >> 8) / 16)
-	d_msg.append((crc & 0xFF) % 16)
-	d_msg.append((crc & 0xFF) / 16)
+	crc = int(crc)
+	d_msg.append(int((crc >> 8) % 16))
+	d_msg.append(int((crc >> 8) / 16))
+	d_msg.append(int((crc & 0xFF) % 16))
+	d_msg.append(int((crc & 0xFF) / 16))
 	return d_msg
 
 
@@ -148,8 +150,8 @@ def generatePhyPacket(macpacket):
 		d_msg.append(0)
 	d_msg.append(7)
 	d_msg.append(10)
-	d_msg.append((MacLen/2) % 16)
-	d_msg.append((MacLen/2) / 16)
+	d_msg.append(int((MacLen/2) % 16))
+	d_msg.append(int((MacLen/2) / 16))
 	for i in range(MacLen):
 		d_msg.append(macpacket[i])
 
@@ -166,8 +168,8 @@ def generateRandomPayload(len):
 
 def generateFixedPayload(len, symbol):
 	load = []
-	load.append((symbol & 0xFF) % 16)
-	load.append((symbol & 0xFF) / 16)
+	load.append(int((symbol & 0xFF) % 16))
+	load.append(int((symbol & 0xFF) / 16))
 	for i in range(len-2):
 		content = 5
 		load.append(content)
