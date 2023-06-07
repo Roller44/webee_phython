@@ -64,8 +64,8 @@ def inversemodp(a, p):
 	(x,y) = generalizedEuclidianAlgorithm(p, a % p)
 	return y % p
 
-def identitymatrix(n):
-	return [[long(x == y) for x in range(0, n)] for y in range(0, n)]
+# def identitymatrix(n):
+# 	return [[long(x == y) for x in range(0, n)] for y in range(0, n)]
 
 def inversematrix(A):
 	# This function calculate the inverse of a given matrix, A, via Gaussian
@@ -190,7 +190,7 @@ T2 = [0, -1, -2, -3, -6]
 CETable = [[] for i in range(NCBPS)] # Elements in the table are indices of uncoded bits.
 
 totalY = 0
-for i in range(NCBPS/3 + 1):
+for i in range(int(NCBPS/3 + 1)):
 	tempY = [[0 for k in range(5)] for l in range(6)]
 	for j in range(3):
 		t = i * 3 + j
@@ -233,7 +233,7 @@ permutation = [0 for i in range(NCBPS)]
 for k in range(NCBPS):
 	i = (NCBPS / 16) * (k % 16) + k / 16
 	j = s * (i / s) + (i + NCBPS - ((16 * i) / NCBPS)) % s
-	permutation[k] = j
+	permutation[k] = j # type: ignore
 # Retrace the original indices of each permutated/interleaved bits. 
 # For example, it will show that the j-th permutated bit is the original k-th bit.
 reverseperm = [0 for i in range(NCBPS)]
@@ -434,7 +434,7 @@ for qamkk in range(100):
 
 	NWEBeeSymbols = len(alloutputbits) # Number of WiFi data symbols.
 
-	WEBeeBits = NCBPS * 3 / 4 # Number of bits before convolutional encoding with a coding rate of 3/4.
+	WEBeeBits = int(NCBPS * 3 / 4) # Number of bits before convolutional encoding with a coding rate of 3/4.
 
 	CERegisters = [0,0,0,0,0,0,0]
 	packetfile = "./data/WEBeeBits"+str(qamkk)+".txt"

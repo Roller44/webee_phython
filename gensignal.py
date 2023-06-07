@@ -28,6 +28,7 @@ def cycleshift(symbol, offset):
 	for i in range(length):
 		tsymbol[i] = symbol[i]
 
+	csymbol = 0
 	if offset >= 0:
 		# e.g. when offset = 2, we have [1, 2, 3, 4, 5] -> [3, 4, 5, 1, 2]
 		csymbol = tsymbol[offset:]+tsymbol[:offset]
@@ -51,8 +52,8 @@ def generateQAM(N, side):
 		for j in range(m):
 			x = xstart + i * interval
 			y = ystart + j * interval
-			qam[i*m + j][0] = float("%.5f" %x)
-			qam[i*m + j][1] = float("%.5f" %y)
+			qam[i*m + j][0] = float("%.5f" %x) # type: ignore
+			qam[i*m + j][1] = float("%.5f" %y) # type: ignore
 	return qam
 
 def Edis(point1,point2):
@@ -237,24 +238,24 @@ def shiftCons(approxfftIQs, xdelta, ydelta):
 
 	return newIQs
 
-def cyclicprefixer(IQs):
-	M = WITHOUTCP
-	N = WITHCP
-	length = len(IQs)
-	G = length / M
-	afterIQs = []
-	for g in range(G):
-		tempIQs = IQs[g*M:(g+1)*M]
+# def cyclicprefixer(IQs):
+# 	M = WITHOUTCP
+# 	N = WITHCP
+# 	length = len(IQs)
+# 	G = int(length / M)
+# 	afterIQs = []
+# 	for g in range(G):
+# 		tempIQs = IQs[g*M:(g+1)*M]
 		
-	for j in range(N-M):
-		cpI = tempIQs[2*M - N + j][0]
-		cpQ = tempIQs[2*M - N + j][1]
-		afterIQs.append([cpI,cpQ])
+# 	for j in range(N-M):
+# 		cpI = tempIQs[2*M - N + j][0]
+# 		cpQ = tempIQs[2*M - N + j][1]
+# 		afterIQs.append([cpI,cpQ])
 		
-	for j in range(M):
-		afterIQs.append([tempIQs[j][0], tempIQs[j][1]])
+# 	for j in range(M):
+# 		afterIQs.append([tempIQs[j][0], tempIQs[j][1]])
 		
-	return afterIQs
+# 	return afterIQs
 
 def get_freq_qam(symbol, ratio, subc):
 
@@ -267,7 +268,7 @@ def generateIQSignal(symbol, ratio, subc):
 	groupsize = WITHCP
 	groupbeforecp = WITHOUTCP
 	delta = WITHCP - WITHOUTCP
-	Groups = length / groupsize
+	Groups = int(length / groupsize)
 	approxIY = []
 	approxQY = []
 	for g in range(Groups):
@@ -309,7 +310,7 @@ def generateISignal(symbol, ratio, subc):
 	groupsize = WITHCP
 	groupbeforecp = WITHOUTCP
 	delta = WITHCP - WITHOUTCP
-	Groups = length / groupsize
+	Groups = int(length / groupsize)
 	approxIY = []
 	approxQY = []
 	for g in range(Groups):
@@ -364,8 +365,8 @@ def generateQSignal(symbol, ratio, subc):
 	groupsize = WITHCP
 	groupbeforecp = WITHOUTCP
 	delta = WITHCP - WITHOUTCP
-	Groups = length / groupsize
-	delta1 = WITHCP / 8 
+	Groups = int(length / groupsize)
+	delta1 = int(WITHCP / 8 )
 	# "deltal" is the duration of a half-chip_seq signal flipping. 
 	# See the "solution" in section 5.2 of the original paper.
 
@@ -378,12 +379,12 @@ def generateQSignal(symbol, ratio, subc):
 	#Left Shift
 	if symbol == 5 or symbol == 2 or symbol == 4 or symbol == 6 or symbol == 12 or symbol == 13 or symbol == 14:
 		for i in range(delta1):
-			LeftWholeIQs[i][1] = -1 * LeftWholeIQs[i][1]
+			LeftWholeIQs[i][1] = -1 * LeftWholeIQs[i][1] # type: ignore
 
     #Right Shift
 	if symbol == 5 or symbol == 2 or symbol == 4 or symbol == 6 or symbol == 12 or symbol == 13 or symbol == 14:
 		for i in range(delta1):
-			RightWholeIQs[length - delta1 + i][1] = -1 * RightWholeIQs[length - delta1 + i][1]
+			RightWholeIQs[length - delta1 + i][1] = -1 * RightWholeIQs[length - delta1 + i][1] # type: ignore
 
 	approxIY = []
 	approxQY = []
@@ -391,10 +392,10 @@ def generateQSignal(symbol, ratio, subc):
 		complexIQs = []
 		if ALIGNMENT[g] == 0:
 			for i in range(0, WITHCP - delta):
-				complexIQs.append(np.complex64(LeftWholeIQs[g*groupsize + i][1]*1j))
+				complexIQs.append(np.complex64(LeftWholeIQs[g*groupsize + i][1]*1j)) # type: ignore
 		if ALIGNMENT[g] == 1:
 			for i in range(delta, WITHCP):
-				complexIQs.append(np.complex64(RightWholeIQs[g*groupsize + i][1]*1j))
+				complexIQs.append(np.complex64(RightWholeIQs[g*groupsize + i][1]*1j)) # type: ignore
 
 		complexIQs = np.array(complexIQs)
 		tempsp = np.fft.fft(complexIQs)
@@ -404,6 +405,7 @@ def generateQSignal(symbol, ratio, subc):
 		# Cyclic right shift quadrature signal for 0.5us if ALIGMENT is 1.
 		tempSignals = []
 		for jj in range(len(tempsp)):
+			comangle = 0
 			if ALIGNMENT[g] == 0:
 				comangle = 1*2*jj*np.pi*delta1*1.0/WITHOUTCP
 			if ALIGNMENT[g] == 1:
@@ -436,7 +438,7 @@ def generateIFFTSignal(approxfftIQs):
 	newIQs = []
 	complexfftIQs = []
 	groupsize = WITHOUTCP
-	Groups = length / groupsize
+	Groups = int(length / groupsize)
 	for g in range(Groups):
 		fftIQs = [[0, 0] for i in range(groupsize)]
 		for i in range(groupsize):
