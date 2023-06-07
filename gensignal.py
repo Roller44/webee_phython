@@ -142,7 +142,7 @@ def generateIQ(symbol, ratio):
 	# The output IQ values are WiFi sampling instances over the ZigBee symbol.
 
 	# Chip map constuction.
-	chips = [[] for i in range(16)]
+	chips = np.zeros((16, 32))
 	chips[0] = [1,1,0,1,  1,0,0,1,  1,1,0,0, 0,0,1,1,  0,1,0,1, 0,0,1,0, 0,0,1,0, 1,1,1,0]
 	chips[1] = [1,1,1,0,  1,1,0,1,  1,0,0,1,  1,1,0,0, 0,0,1,1,  0,1,0,1, 0,0,1,0, 0,0,1,0]
 	chips[2] = [0,0,1,0, 1,1,1,0,  1,1,0,1,  1,0,0,1,  1,1,0,0, 0,0,1,1,  0,1,0,1, 0,0,1,0]
@@ -185,7 +185,7 @@ def generateIQ(symbol, ratio):
 	SampleRate = SAMPLERATE
 	X = []
 	for i in range(16):
-		for j in range(SampleRate):
+		for j in range(int(SampleRate)):
 			X.append(i*np.pi + j*np.pi / SampleRate)
 
 	# Set value of each WiFi sampling instance.
@@ -203,12 +203,12 @@ def generateIQ(symbol, ratio):
 			Qindex = 0
 
 		# Let amplitudes 1 and -1 represent chip_seq values 1 and -1, respectively.
-		if Ichips[Iindex] == 1:
+		if Ichips[int(Iindex)] == 1:
 			Ibit = 1
 		else:
 			Ibit = -1
 
-		if Qchips[Qindex] == 1:
+		if Qchips[int(Qindex)] == 1:
 			Qbit = 1
 		else:
 			Qbit = -1
@@ -255,6 +255,10 @@ def cyclicprefixer(IQs):
 		afterIQs.append([tempIQs[j][0], tempIQs[j][1]])
 		
 	return afterIQs
+
+def get_freq_qam(symbol, ratio, subc):
+
+	return 0
 
 def generateIQSignal(symbol, ratio, subc):
 	WholeSignals = []
