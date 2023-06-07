@@ -77,7 +77,7 @@ def approxQAM(qam, IQs):
 		if x1 == 0 and y1 == 0:
 			approxIQs.append([0,0])
 		else:
-			# Find the index of qam whose value is the most similar to a given ideal
+			# Find the wave_index of qam whose value is the most similar to a given ideal
 			# WiFi sampling instance.
 			mindis = 1000
 			minindex = -1
@@ -92,6 +92,50 @@ def approxQAM(qam, IQs):
 			approxIQs.append(qam[minindex])
 
 	return approxIQs
+def get_zigbee_signal(symbol, ratio):
+	# This function generates the waveform of a ZigBee symbol.
+	# The output IQ values are WiFi sampling instances over the ZigBee symbol.
+
+	# Chip map constuction.
+	chip_map = np.zeros((16, 32))
+	chip_map[0] = [1,1,0,1,1,0,0,1,1,1,0,0,0,0,1,1,0,1,0,1,0,0,1,0,0,0,1,0,1,1,1,0]
+	chip_map[1] = [1,1,1,0,1,1,0,1,1,0,0,1,1,1,0,0,0,0,1,1,0,1,0,1,0,0,1,0,0,0,1,0]
+	chip_map[2] = [0,0,1,0,1,1,1,0,1,1,0,1,1,0,0,1,1,1,0,0,0,0,1,1,0,1,0,1,0,0,1,0]
+	chip_map[3] = [0,0,1,0,0,0,1,0,1,1,1,0,1,1,0,1,1,0,0,1,1,1,0,0,0,0,1,1,0,1,0,1]
+	chip_map[4] = [0,1,0,1,0,0,1,0,0,0,1,0,1,1,1,0,1,1,0,1,1,0,0,1,1,1,0,0,0,0,1,1]
+	chip_map[5] = [0,0,1,1,0,1,0,1,0,0,1,0,0,0,1,0,1,1,1,0,1,1,0,1,1,0,0,1,1,1,0,0]
+	chip_map[6] = [1,1,0,0,0,0,1,1,0,1,0,1,0,0,1,0,0,0,1,0,1,1,1,0,1,1,0,1,1,0,0,1]
+	chip_map[7] = [1,0,0,1,1,1,0,0,0,0,1,1,0,1,0,1,0,0,1,0,0,0,1,0,1,1,1,0,1,1,0,1]
+	chip_map[8] = [1,0,0,0,1,1,0,0,1,0,0,1,0,1,1,0,0,0,0,0,0,1,1,1,0,0,1,1,1,0,1,1]
+	chip_map[9] = [1,0,1,1,1,0,0,0,1,1,0,0,1,0,0,1,0,1,1,0,0,0,0,0,0,1,1,1,0,0,1,1]
+	chip_map[10] = [0,0,1,1,1,0,1,1,1,0,0,0,1,1,0,0,1,0,0,1,0,1,1,0,0,0,0,0,0,1,1,1]
+	chip_map[11] = [0,1,1,1,0,0,1,1,1,0,1,1,1,0,0,0,1,1,0,0,1,0,0,1,0,1,1,0,0,0,0,0]
+	chip_map[12] = [0,0,0,0,0,1,1,1,0,0,1,1,1,0,1,1,1,0,0,0,1,1,0,0,1,0,0,1,0,1,1,0]
+	chip_map[13] = [0,1,1,0,0,0,0,0,0,1,1,1,0,0,1,1,1,0,1,1,1,0,0,0,1,1,0,0,1,0,0,1]
+	chip_map[14] = [1,0,0,1,0,1,1,0,0,0,0,0,0,1,1,1,0,0,1,1,1,0,1,1,1,0,0,0,1,1,0,0]
+	chip_map[15] = [1,1,0,0,1,0,0,1,0,1,1,0,0,0,0,0,0,1,1,1,0,0,1,1,1,0,1,1,1,0,0,0]
+	# Symbol-to-chip_seq.
+	chip_seq = chip_map[symbol]
+	# Set time values of WiFi sampling instances.
+	# Each half-sine wave sampled 20 times by WiFi.
+	num_sample_per_wave = SAMPLERATE
+	# Generate waves.
+	wave = np.sin(np.arange(0, np.pi, np.pi/num_sample_per_wave)) 
+	wave = np.tile(wave, 16)
+	# Generate in-phase waves.
+	I_chip_seq = chip_seq[::2]
+	I_chip_seq = (I_chip_seq - 0.5) * 2
+	I_chip_seq = np.repeat(I_chip_seq, num_sample_per_wave)
+	I_wave = I_chip_seq * wave
+	I_wave = np.concatenate((I_wave, np.zeros(int(num_sample_per_wave / 2)))) * ratio
+	# Generate quadrant waves.
+	Q_chip_seq = chip_seq[1::2]
+	Q_chip_seq = (Q_chip_seq - 0.5) * 2
+	Q_chip_seq = np.repeat(Q_chip_seq, num_sample_per_wave)
+	Q_wave = Q_chip_seq * wave
+	Q_wave = np.concatenate((np.zeros(int(num_sample_per_wave / 2)), Q_wave)) * ratio
+
+	return np.vectorize(complex)(I_wave, Q_wave)
 
 def generateIQ(symbol, ratio):
 	# This function generates the waveform of a ZigBee symbol.
@@ -99,24 +143,24 @@ def generateIQ(symbol, ratio):
 
 	# Chip map constuction.
 	chips = [[] for i in range(16)]
-	chips[0] = [1,1,0,1,1,0,0,1,1,1,0,0,0,0,1,1,0,1,0,1,0,0,1,0,0,0,1,0,1,1,1,0]
-	chips[1] = [1,1,1,0,1,1,0,1,1,0,0,1,1,1,0,0,0,0,1,1,0,1,0,1,0,0,1,0,0,0,1,0]
-	chips[2] = [0,0,1,0,1,1,1,0,1,1,0,1,1,0,0,1,1,1,0,0,0,0,1,1,0,1,0,1,0,0,1,0]
-	chips[3] = [0,0,1,0,0,0,1,0,1,1,1,0,1,1,0,1,1,0,0,1,1,1,0,0,0,0,1,1,0,1,0,1]
-	chips[4] = [0,1,0,1,0,0,1,0,0,0,1,0,1,1,1,0,1,1,0,1,1,0,0,1,1,1,0,0,0,0,1,1]
-	chips[5] = [0,0,1,1,0,1,0,1,0,0,1,0,0,0,1,0,1,1,1,0,1,1,0,1,1,0,0,1,1,1,0,0]
-	chips[6] = [1,1,0,0,0,0,1,1,0,1,0,1,0,0,1,0,0,0,1,0,1,1,1,0,1,1,0,1,1,0,0,1]
-	chips[7] = [1,0,0,1,1,1,0,0,0,0,1,1,0,1,0,1,0,0,1,0,0,0,1,0,1,1,1,0,1,1,0,1]
-	chips[8] = [1,0,0,0,1,1,0,0,1,0,0,1,0,1,1,0,0,0,0,0,0,1,1,1,0,0,1,1,1,0,1,1]
-	chips[9] = [1,0,1,1,1,0,0,0,1,1,0,0,1,0,0,1,0,1,1,0,0,0,0,0,0,1,1,1,0,0,1,1]
-	chips[10] = [0,0,1,1,1,0,1,1,1,0,0,0,1,1,0,0,1,0,0,1,0,1,1,0,0,0,0,0,0,1,1,1]
-	chips[11] = [0,1,1,1,0,0,1,1,1,0,1,1,1,0,0,0,1,1,0,0,1,0,0,1,0,1,1,0,0,0,0,0]
-	chips[12] = [0,0,0,0,0,1,1,1,0,0,1,1,1,0,1,1,1,0,0,0,1,1,0,0,1,0,0,1,0,1,1,0]
-	chips[13] = [0,1,1,0,0,0,0,0,0,1,1,1,0,0,1,1,1,0,1,1,1,0,0,0,1,1,0,0,1,0,0,1]
-	chips[14] = [1,0,0,1,0,1,1,0,0,0,0,0,0,1,1,1,0,0,1,1,1,0,1,1,1,0,0,0,1,1,0,0]
-	chips[15] = [1,1,0,0,1,0,0,1,0,1,1,0,0,0,0,0,0,1,1,1,0,0,1,1,1,0,1,1,1,0,0,0]
+	chips[0] = [1,1,0,1,  1,0,0,1,  1,1,0,0, 0,0,1,1,  0,1,0,1, 0,0,1,0, 0,0,1,0, 1,1,1,0]
+	chips[1] = [1,1,1,0,  1,1,0,1,  1,0,0,1,  1,1,0,0, 0,0,1,1,  0,1,0,1, 0,0,1,0, 0,0,1,0]
+	chips[2] = [0,0,1,0, 1,1,1,0,  1,1,0,1,  1,0,0,1,  1,1,0,0, 0,0,1,1,  0,1,0,1, 0,0,1,0]
+	chips[3] = [0,0,1,0, 0,0,1,0, 1,1,1,0,  1,1,0,1,  1,0,0,1,  1,1,0,0, 0,0,1,1,  0,1,0,1]
+	chips[4] = [0,1,0,1, 0,0,1,0, 0,0,1,0, 1,1,1,0,  1,1,0,1,  1,0,0,1,  1,1,0,0, 0,0,1,1]
+	chips[5] = [0,0,1,1,  0,1,0,1, 0,0,1,0, 0,0,1,0, 1,1,1,0,  1,1,0,1,  1,0,0,1,  1,1,0,0] 
+	chips[6] = [1,1,0,0, 0,0,1,1,  0,1,0,1, 0,0,1,0, 0,0,1,0, 1,1,1,0,  1,1,0,1,  1,0,0,1]
+	chips[7] = [1,0,0,1,  1,1,0,0, 0,0,1,1,  0,1,0,1,  0,0,1,0, 0,0,1,0, 1,1,1,0, 1,1,0,1]
+	chips[8] = [1,0,0,0,  1,1,0,0,  1,0,0,1, 0,1,1,0,  0,0,0,0, 0,1,1,1, 0,0,1,1, 1,0,1,1]
+	chips[9] = [1,0,1,1, 1,0,0,0,  1,1,0,0,  1,0,0,1, 0,1,1,0,  0,0,0,0, 0,1,1,1, 0,0,1,1]
+	chips[10] = [0,0,1,1, 1,0,1,1, 1,0,0,0,  1,1,0,0,  1,0,0,1, 0,1,1,0,  0,0,0,0, 0,1,1,1]
+	chips[11] = [0,1,1,1, 0,0,1,1, 1,0,1,1, 1,0,0,0,  1,1,0,0,  1,0,0,1, 0,1,1,0,  0,0,0,0]
+	chips[12] = [0,0,0,0, 0,1,1,1, 0,0,1,1, 1,0,1,1, 1,0,0,0,  1,1,0,0,  1,0,0,1, 0,1,1,0]
+	chips[13] = [0,1,1,0,  0,0,0,0, 0,1,1,1, 0,0,1,1, 1,0,1,1, 1,0,0,0,  1,1,0,0,  1,0,0,1]
+	chips[14] = [1,0,0,1, 0,1,1,0,  0,0,0,0, 0,1,1,1, 0,0,1,1, 1,0,1,1, 1,0,0,0,  1,1,0,0]
+	chips[15] = [1,1,0,0, 1,0,0,1, 0,1,1,0,  0,0,0,0, 0,1,1,1, 0,0,1,1, 1,0,1,1, 1,0,0,0]
 
-	# Symbol-to-chip.
+	# Symbol-to-chip sequence.
 	chip = chips[symbol]
 	chip_len = len(chip)
 	IQs = []
@@ -131,7 +175,7 @@ def generateIQ(symbol, ratio):
 			Qchips.append(chip[i])
 
 	# Set start time of each half-sine wave.
-	# Here, each chip is encoded into the amplitude of a half-sine wave.
+	# Here, each chip_seq is encoded into the amplitude of a half-sine wave.
 	Interval = []
 	for i in range(chip_len + 1):
 		Interval.append(i*np.pi / 2)
@@ -141,25 +185,24 @@ def generateIQ(symbol, ratio):
 	SampleRate = SAMPLERATE
 	X = []
 	for i in range(16):
-		for j in range(int(SampleRate)):
+		for j in range(SampleRate):
 			X.append(i*np.pi + j*np.pi / SampleRate)
 
 	# Set value of each WiFi sampling instance.
 	for i in range(len(X)):
-		# Figure out which chip the i-th sampling instance belongs to.
+		# Figure out which chip_seq the i-th sampling instance belongs to.
 		x = X[i]
 		index = 0
 		while x > Interval[index]:
-			index = index + 1
-
+			index = index + 1 
 		index = index - 1
-
 		Iindex = index / 2
 		Qindex = (index - 1) / 2
+
 		if Qindex < 0:
 			Qindex = 0
 
-		# Let amplitudes 1 and -1 represent chip values 1 and -1, respectively.
+		# Let amplitudes 1 and -1 represent chip_seq values 1 and -1, respectively.
 		if Ichips[Iindex] == 1:
 			Ibit = 1
 		else:
@@ -319,7 +362,7 @@ def generateQSignal(symbol, ratio, subc):
 	delta = WITHCP - WITHOUTCP
 	Groups = length / groupsize
 	delta1 = WITHCP / 8 
-	# "deltal" is the duration of a half-chip signal flipping. 
+	# "deltal" is the duration of a half-chip_seq signal flipping. 
 	# See the "solution" in section 5.2 of the original paper.
 
 	LeftWholeIQs = copy.deepcopy(WholeIQs)
@@ -430,7 +473,7 @@ def compensateCFO(IQs, deltaf, Fs):
 		newIQs[i][1] = com[1]
 	return newIQs
 
-def generateMultipleSignal(count, chips, ratio):
+def generateMultipleSignal(count, chip_map, ratio):
 	Groups = 5
 	GroupSize = 48
 	subc = 5
@@ -440,9 +483,9 @@ def generateMultipleSignal(count, chips, ratio):
 	comdeltaf = [-0.4375,0.1875,0.8125,1.4375]
 	#comdeltaf = [0,0,0,0]
 	for cc in range(count):
-		chip = chips[cc]
+		chip_seq = chip_map[cc]
 		#subchannels = channels[cc]
-		WholeIQs = generateIQ(chip, ratio)
+		WholeIQs = generateIQ(chip_seq, ratio)
 		deltaf = comdeltaf[cc]
 		WholeIQs = compensateCFO(WholeIQs,deltaf,15)
 		approxIY = []
