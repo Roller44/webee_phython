@@ -6,9 +6,9 @@ import random
 import struct
 from CRC16Kermit import CRC16Kermit
 import numpy as np
-from GF import GF
+# from GF import GF
 
-gf = GF(2)
+# gf = GF(2)
 
 
 def bitxor(a,b):
@@ -231,8 +231,8 @@ s = 3 # =max(NCBPS/2, 1)
 # Here, the k-th bit will be move to the position where the j-th bit at.
 permutation = [0 for i in range(NCBPS)]
 for k in range(NCBPS):
-	i = (NCBPS / 16) * (k % 16) + k / 16
-	j = s * (i / s) + (i + NCBPS - ((16 * i) / NCBPS)) % s
+	i = int((NCBPS / 16) * (k % 16) + int(k / 16))
+	j = s * int(i / s) + (i + NCBPS - int(((16 * i) / NCBPS))) % s
 	permutation[k] = j # type: ignore
 # Retrace the original indices of each permutated/interleaved bits. 
 # For example, it will show that the j-th permutated bit is the original k-th bit.
@@ -379,15 +379,6 @@ for qamkk in range(100):
 		Left.append([])
 		Right.append(copy.deepcopy(CETable[Z[i]]))
 	
-	for ith in range(len(CETable)):
-		print(CETable[ith])
-	
-	print("******************************************************")
-	for ith in range(len(Right)):
-		print(Right[ith])
-
-	import pdb
-	pdb.set_trace()
 
 	for i in range(len(XS)):
 		x = XS[i]
@@ -417,11 +408,7 @@ for qamkk in range(100):
 
 	#print gf.matrix_rank(np.matrix(Matrix))
 	tempMatrix = copy.deepcopy(Matrix)
-	for ith in range(len(tempMatrix)):
-		print(tempMatrix[ith])
-
 	A_invert = inversematrix(tempMatrix)
-	pdb.set_trace()
 	#print A_invert
 	#print gf.matrix_rank(np.matrix(A_invert))
 
@@ -457,7 +444,6 @@ for qamkk in range(100):
 		# Reverse the convolutional encoding: find uncoded bits corresponding to coded bits 
 		# that used to emulate ZigBee signals.
 		CX = SolveXOREquations(A_invert, Y)
-		pdb.set_trace()
 		# Y1 = SolveXOREquations(Matrix, CX)
 
 		# for ii in range(len(Y)):

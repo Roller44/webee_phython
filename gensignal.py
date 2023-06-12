@@ -93,7 +93,7 @@ def approxQAM(qam, IQs):
 			approxIQs.append(qam[minindex])
 
 	return approxIQs
-def get_zigbee_signal(symbol, ratio):
+def get_zigbee_signal(symbol: int, ratio: float):
 	# This function generates the waveform of a ZigBee symbol.
 	# The output IQ values are WiFi sampling instances over the ZigBee symbol.
 
@@ -128,13 +128,24 @@ def get_zigbee_signal(symbol, ratio):
 	I_chip_seq = (I_chip_seq - 0.5) * 2
 	I_chip_seq = np.repeat(I_chip_seq, num_sample_per_wave)
 	I_wave = I_chip_seq * wave
-	I_wave = np.concatenate((I_wave, np.zeros(int(num_sample_per_wave / 2)))) * ratio
+	# Used in the final version: I_wave = np.concatenate((I_wave, np.zeros(int(num_sample_per_wave / 2)))) * ratio
+	# Below 1 line will be deleted in the final version.
+	I_wave = I_wave * ratio
 	# Generate quadrant waves.
 	Q_chip_seq = chip_seq[1::2]
 	Q_chip_seq = (Q_chip_seq - 0.5) * 2
 	Q_chip_seq = np.repeat(Q_chip_seq, num_sample_per_wave)
 	Q_wave = Q_chip_seq * wave
-	Q_wave = np.concatenate((np.zeros(int(num_sample_per_wave / 2)), Q_wave)) * ratio
+	# Used in the final version: Q_wave = np.concatenate((np.zeros(int(num_sample_per_wave / 2)), Q_wave)) * ratio
+	# Below 3 lines will be deleted in the final version.
+	Q_wave = np.roll(Q_wave, int(num_sample_per_wave / 2)) * ratio
+	if Q_chip_seq[0] == Q_chip_seq[-1]:
+		Q_wave[:int(num_sample_per_wave / 2):] *= -1 
+
+	plt.figure(0)
+	plt.plot(I_wave)
+	plt.plot(Q_wave)
+	plt.show()
 
 	return np.vectorize(complex)(I_wave, Q_wave)
 
@@ -232,20 +243,20 @@ def generateIQ(symbol, ratio):
 		# test_waves.append([test_i, test_q])
 	
 
-	# i_wave = []
-	# q_wave = []
+	i_wave = []
+	q_wave = []
 	# test_i_wave = []
 	# test_q_wave = []
-	# for ith in range(len(X)):
-	# 	i_wave.append(IQs[ith][0])
-	# 	q_wave.append(IQs[ith][1])
+	for ith in range(len(X)):
+		i_wave.append(IQs[ith][0])
+		q_wave.append(IQs[ith][1])
 	# 	test_i_wave.append(test_waves[ith][0])
 	# 	test_q_wave.append(test_waves[ith][1])
 
-	# plt.figure(0)
-	# plt.plot(i_wave)
-	# plt.plot(q_wave)
-	# plt.show()
+	plt.figure(1)
+	plt.plot(i_wave)
+	plt.plot(q_wave)
+	plt.show()
 	# plt.figure(1)
 	# plt.plot(test_i_wave)
 	# plt.plot(test_q_wave)
@@ -284,7 +295,13 @@ def shiftCons(approxfftIQs, xdelta, ydelta):
 		
 # 	return afterIQs
 
-def get_freq_qam(symbol, ratio, subc):
+def get_freq_qam(symbol: int, ratio: float, subc):
+	zigbee_signal = get_zigbee_signal(symbol, ratio)
+	num_wifi_sym = int(len(zigbee_signal) / WITHCP)
+	cp_size = WITHCP - WITHOUTCP
+	for symith in range(num_wifi_sym):
+		if symith % 2 == 0:
+			print("!")
 
 	return 0
 
